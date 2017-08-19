@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface CelulaCustomizadaTableViewCell : UITableViewCell
-
+@property (weak, nonatomic) IBOutlet UILabel *locationTitle;
 @end
