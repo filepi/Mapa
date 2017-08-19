@@ -76,15 +76,40 @@ float lat, lng;
     self.locationManager.distanceFilter = kCLDistanceFilterNone;
     self.locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
     [self.locationManager startUpdatingHeading];
+    [self addGestureToMap];
 }
 
--(void)markPoint: (NSString*) lugar
+- (IBAction)removeLocation:(id)sender {
+    [self.mapView removeAnnotations:self.mapView.annotations];
+}
+
+
+-(void)markPoint: (CLLocation*) lugar
 {
     MKPointAnnotation *point = [[MKPointAnnotation alloc] init];
-    CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(lat, lng);
-    point.title = lugar;
+    CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(lugar.coordinate.latitude, lugar.coordinate.longitude);
+    point.title = @"location";
     point.coordinate = coordinate;
     [self.mapView addAnnotation:point];
+}
+
+-(void)addGestureToMap{
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapMap:)];
+    tapGesture.numberOfTapsRequired = 1;
+    tapGesture.numberOfTouchesRequired = 1;
+    tapGesture.delaysTouchesBegan = YES;
+    
+    [tapGesture setCancelsTouchesInView:YES];
+    [self.mapView addGestureRecognizer:tapGesture];
+}
+
+-(void)tapMap:(UITapGestureRecognizer *)recognizer{
+    CGPoint touchPoint = [recognizer locationInView:self.mapView];
+    
+    CLLocationCoordinate2D touchMapCoordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+    CLLocation *location  = [[CLLocation alloc] initWithLatitude:touchMapCoordinate.latitude longitude:touchMapCoordinate.longitude];
+    
+    [self markPoint:location];
 }
 
 -(void)colectAddress{
@@ -93,9 +118,6 @@ float lat, lng;
         CLPlacemark *placemark = placemarks[0];
         NSLog(@"%@", placemark.thoroughfare);
         NSLog(@"%@", placemark.subLocality);
-        
-        [self markPoint:placemark.subLocality];
-
     }];
 }
 
