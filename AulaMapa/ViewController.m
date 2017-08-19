@@ -47,8 +47,6 @@ float lat, lng;
     
     NSLog(@"Lat = %f, Lng = %f",lat,lng);
     
-    
-    [self markPoint];
     [self centerMap];
 
 }
@@ -61,6 +59,7 @@ float lat, lng;
     newRegion.span.latitudeDelta = 0.0005;
     newRegion.span.longitudeDelta = 0.0005;
     
+    [self colectAddress];
     [self.mapView setRegion:newRegion];
     
 }
@@ -79,13 +78,25 @@ float lat, lng;
     [self.locationManager startUpdatingHeading];
 }
 
--(void)markPoint
+-(void)markPoint: (NSString*) lugar
 {
     MKPointAnnotation *point = [[MKPointAnnotation alloc] init];
     CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(lat, lng);
-    point.title = @"Dois Unidos";
+    point.title = lugar;
     point.coordinate = coordinate;
     [self.mapView addAnnotation:point];
+}
+
+-(void)colectAddress{
+    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
+    [geoCoder reverseGeocodeLocation:self.locationManager.location completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+        CLPlacemark *placemark = placemarks[0];
+        NSLog(@"%@", placemark.thoroughfare);
+        NSLog(@"%@", placemark.subLocality);
+        
+        [self markPoint:placemark.subLocality];
+
+    }];
 }
 
 @end
